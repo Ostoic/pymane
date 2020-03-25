@@ -1,3 +1,7 @@
+from pymane.log import get_logger
+
+log = get_logger(__name__)
+
 class Skill:
 	def __init__(self, name: str, level: int = 0, max_level: int = 450):
 		self.__name = name

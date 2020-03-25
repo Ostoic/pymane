@@ -11,7 +11,7 @@ from pymane.statistics import Statistics
 from pymane.statistics.statistic import Statistic
 from pymane.talents import TalentSpec
 
-log = get_logger('pymane.character')
+log = get_logger(__name__)
 
 class CharacterNotFoundError(Exception):
 	pass
@@ -156,7 +156,8 @@ class Character:
 	async def highest_rating(self) -> Statistic:
 		results = await self.statistics().category(pymane.statistics.categories.arena_pvp)
 		ratings = [Statistic(description, value) for description, value in results if 'highest' in description.lower() and value.isdigit()]
-		return sorted(ratings, key=lambda l: int(l.value), reverse=True)[0]
+		sorted_ratings = sorted(ratings, key=lambda l: int(l.value), reverse=True)
+		return sorted_ratings[0]
 
 	def realm(self) -> str:
 		return self.__realm_name

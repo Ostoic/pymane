@@ -1,10 +1,13 @@
 import re
 import html
-
-from aiohttp import FormData
 from pymane.statistics.category import Category
 
 categories = Category
+
+def _process_value(value):
+	if value == '- -':
+		return None
+	return value
 
 class Statistics:
 	def __init__(self, character, http):
@@ -14,8 +17,7 @@ class Statistics:
 
 	async def category(self, category: Category):
 		path = f'character/{self.__character.name()}/{self.__character.realm()}/statistics'
-		data = FormData(fields=[('category', category.value)])
-		response = await self.__http.armory_post(path, data=data)
+		response = await self.__http.armory_post(path, data={'category': category.value})
 		result = html.unescape(str(response))
 
-		return self.__field_pattern.findall(result)
+		return [(description, _process_value(value)) for description, value in self.__field_pattern.findall(result)]

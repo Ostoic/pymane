@@ -1,4 +1,7 @@
 from typing import List
+from pymane.log import get_logger
+
+log = get_logger(__name__)
 
 class TalentSpec:
 	def __init__(self, name: str, tree1_points: int = 0, tree2_points: int = 0, tree3_points: int = 0):

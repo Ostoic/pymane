@@ -1,7 +1,7 @@
 from .log import get_logger
 from .character import Character
 
-log = get_logger('pymane.armory')
+log = get_logger(__name__)
 
 class Armory:
 	def __init__(self, session):

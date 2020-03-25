@@ -1,9 +1,9 @@
-import aiohttp
+import asks
 from .armory import Armory
 
 class Session:
 	def __init__(self):
-		self.http = aiohttp.ClientSession()
+		self.http = asks.Session()
 		self.armory = Armory(session=self)
 
 	async def close(self):
