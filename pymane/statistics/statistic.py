@@ -1,5 +1,5 @@
 class Statistic:
-	def __init__(self, description: str, value: str):
+	def __init__(self, value: str, description: str):
 		self.description = description
 		self.value = value
 

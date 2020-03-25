@@ -19,6 +19,13 @@ class CharacterNotFoundError(Exception):
 class UnhandledParseError(Exception):
 	pass
 
+def is_highest_rating_statistic(value, description):
+	return description is not None \
+	       and value is not None \
+	       and value.isdigit() \
+	       and 'highest' in description.lower() \
+	       and 'personal rating' in description.lower()
+
 def _extract_level_race_class(info: str) -> Tuple[int, pymane.races.Race, str]:
 	for race in pymane.races.all:
 		if race.name in info:
@@ -151,11 +158,11 @@ class Character:
 
 		stubs = list(pvpteams.select('.stub'))
 		teams = [stub.select_one('.text').text.split() for stub in stubs]
-		return [ArenaTeam(name=' '.join(team[2:len(team) - 2]), rating=int(team[-2]), type=ArenaTeam.Type.parse(team[0])) for team in teams]
+		return [ArenaTeam(name=' '.join(team[2:len(team) - 2]), rating=int(team[-2]), type=ArenaTeam.ArenaTeamType.parse(team[0])) for team in teams]
 
 	async def highest_rating(self) -> Statistic:
 		results = await self.statistics().category(pymane.statistics.categories.arena_pvp)
-		ratings = [Statistic(description, value) for description, value in results if 'highest' in description.lower() and value.isdigit()]
+		ratings = [Statistic(value, description) for value, description in results if is_highest_rating_statistic(value, description)]
 		sorted_ratings = sorted(ratings, key=lambda l: int(l.value), reverse=True)
 		return sorted_ratings[0]
 

@@ -20,4 +20,4 @@ class Statistics:
 		response = await self.__http.armory_post(path, data={'category': category.value})
 		result = html.unescape(str(response))
 
-		return [(description, _process_value(value)) for description, value in self.__field_pattern.findall(result)]
+		return [(_process_value(value), description) for description, value in self.__field_pattern.findall(result)]

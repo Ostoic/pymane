@@ -14,9 +14,9 @@ async def run():
 				print(f'Skills: {list(await char.secondary_skills())}')
 				print(f'Specs: {list(await char.talent_specs())}')
 				print(f'Arena teams: {list(await char.pvp_teams())}')
-				for description, value in await char.statistics().category(pymane.statistics.categories.killing_blows):
-					print(f'Statistic: {value=}, {description=}')
-				print(f'Highest arena reating: {await char.highest_rating()}')
+				# for value, description in await char.statistics().category(pymane.statistics.categories.arena_pvp):
+				# 	print(f'Statistic: {value=}, {description=}')
+				print(f'Highest arena rating: {await char.highest_rating()}')
 			except Exception as e:
 				print(f'Error: {e}')
 				pass
