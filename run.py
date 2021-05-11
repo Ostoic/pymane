@@ -1,9 +1,13 @@
 import pymane
 import trio
+from loguru import logger
+from pymane.page_cache import new_proxy
+
 
 async def run():
-	players = [('Act', 'Icecrown'), ('Banditwarr', 'Blackrock'), ('Devastators', 'Blackrock')]
-	async with pymane.connect() as warmane:
+	# players = [('Act', 'Icecrown'), ('Banditwarr', 'Blackrock'), ('Devastators', 'Blackrock')]
+	players = [('Adidi', 'Blackrock')]
+	with pymane.connect() as warmane:
 		chars = [warmane.armory.character(name, realm=realm) for name, realm in players]
 		for char in chars:
 			try:
@@ -18,8 +22,7 @@ async def run():
 				# 	print(f'Statistic: {value=}, {description=}')
 				print(f'Highest arena rating: {await char.highest_rating()}')
 			except Exception as e:
-				print(f'Error: {e}')
-				pass
+				logger.exception(e)
 
 # characters, guilds, teams = await warmane.armory.search()
 

@@ -3,6 +3,7 @@ import pymane.races
 from typing import List, Tuple
 
 from pymane.arena_team import ArenaTeam
+from pymane.error import UnhandledParseError, CharacterNotFoundError, CaptchaRequiredError
 from pymane.guild import Guild
 from pymane.log import get_logger
 from pymane.page_cache import PageCache
@@ -12,12 +13,6 @@ from pymane.statistics.statistic import Statistic
 from pymane.talents import TalentSpec
 
 log = get_logger(__name__)
-
-class CharacterNotFoundError(Exception):
-	pass
-
-class UnhandledParseError(Exception):
-	pass
 
 def is_highest_rating_statistic(value, description):
 	return description is not None \
@@ -29,8 +24,8 @@ def is_highest_rating_statistic(value, description):
 def _extract_level_race_class(info: str) -> Tuple[int, pymane.races.Race, str]:
 	for race in pymane.races.all:
 		if race.name in info:
-			info = info.replace(race.name, '').split()
-			return int(info[1]), race, info[2].replace(',', '')
+			result = info.replace(race.name, '').split()
+			return int(result[1]), race, result[2].replace(',', '')
 
 	log.error(f'{info=}')
 	raise UnhandledParseError('Level-race-class parse error')
@@ -39,9 +34,10 @@ class Character:
 	def __init__(self, name: str, armory, realm_name: str = 'Icecrown'):
 		self.__name = name
 		self.__realm_name = realm_name
-		self.__http = PageCache(http=armory.session.http)
+		self.__http = PageCache(http=armory.session)
 
 	async def __character_does_not_exist(self, html):
+		# print(f'[__character_does_not_exist] {html=}')
 		return html.find(text='Page not found') is not None
 
 	async def total_hks(self) -> int:
@@ -79,6 +75,7 @@ class Character:
 
 		stubs = list(profskills.select('.stub'))
 		profs = [stub.select_one('.text').text.split() for stub in stubs]
+
 		return [Skill(prof[0], int(prof[1]), int(prof[3])) for prof in profs]
 
 	async def secondary_skills(self) -> List[Skill]:
@@ -86,7 +83,11 @@ class Character:
 		if await self.__character_does_not_exist(html):
 			raise CharacterNotFoundError(f'{self.name()} of {self.__realm_name} was not found')
 
-		profskills = html.select('.profskills')[1]
+		try:
+			profskills = html.select('.profskills')[1]
+		except IndexError:
+			return []
+
 		if not profskills:
 			return []
 
@@ -105,7 +106,10 @@ class Character:
 
 		stubs = list(specialization.select('.stub'))
 		profs = [stub.select_one('.text').text.split() for stub in stubs]
-		return [TalentSpec(' '.join(prof[0:len(prof) - 5]), int(prof[-5]), int(prof[-3]), int(prof[-1])) for prof in profs]
+		try:
+			return [TalentSpec(' '.join(prof[0:len(prof) - 5]), int(prof[-5]), int(prof[-3]), int(prof[-1])) for prof in profs]
+		except IndexError:
+			return []
 
 	async def _get_info_string(self):
 		html = await self.__http.armory_get(f'character/{self.name()}/{self.__realm_name}/summary')
@@ -114,6 +118,7 @@ class Character:
 
 		character_sheet = html.select_one('#character-sheet')
 		if not character_sheet:
+			log.error(f'No character sheet found: {html=}')
 			return ''
 
 		return character_sheet\
@@ -142,8 +147,6 @@ class Character:
 		if await self.__character_does_not_exist(html):
 			raise CharacterNotFoundError(f'{self.name()} of {self.__realm_name} was not found')
 
-		pass
-
 	def statistics(self) -> Statistics:
 		return Statistics(character=self, http=self.__http)
 
@@ -163,6 +166,9 @@ class Character:
 	async def highest_rating(self) -> Statistic:
 		results = await self.statistics().category(pymane.statistics.categories.arena_pvp)
 		ratings = [Statistic(value, description) for value, description in results if is_highest_rating_statistic(value, description)]
+		if len(ratings) == 0:
+			return Statistic()
+
 		sorted_ratings = sorted(ratings, key=lambda l: int(l.value), reverse=True)
 		return sorted_ratings[0]
 
