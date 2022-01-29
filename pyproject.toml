@@ -5,7 +5,7 @@ description = ""
 authors = ["Shaun Ostoic <ostoic@uwindsor.ca>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 trio = "^0.19"
 loguru = "^0.6"
 requests = "^2.27"
