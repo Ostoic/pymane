@@ -1,0 +1,4 @@
+trio~=0.19
+requests~=2.26
+requests-random-user-agent~=2021.5.29
+beautifulsoup4~=4.9.3
