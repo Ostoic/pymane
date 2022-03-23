@@ -1,12 +1,8 @@
-import datetime
-import inspect
-import time
 import bs4
-import trio
-from requests.exceptions import ProxyError
+import datetime
 
-from pymane.error import CaptchaRequiredError
-from pymane.log import get_logger
+from .error import CaptchaRequiredError
+from .log import get_logger
 
 log = get_logger(__name__)
 

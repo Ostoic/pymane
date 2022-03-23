@@ -5,8 +5,8 @@ from pymane.page_cache import new_proxy
 
 
 async def run():
-	# players = [('Act', 'Icecrown'), ('Banditwarr', 'Blackrock'), ('Devastators', 'Blackrock')]
-	players = [('Adidi', 'Blackrock')]
+	players = [('Act', 'Icecrown'), ('Banditwarr', 'Blackrock'), ('Devastators', 'Blackrock')]
+	# players = [('Adidi', 'Blackrock')]
 	with pymane.connect() as warmane:
 		chars = [warmane.armory.character(name, realm=realm) for name, realm in players]
 		for char in chars:
